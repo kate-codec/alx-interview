@@ -1,100 +1,77 @@
-#!/usr/bin/python3
-'''solving nqueens problem'''
 import sys
 
-
-def is_valid(board, row, col):
-    """
-    Checks if a position of the queen is valid
-    Args:
-        board: 2D array representing the board
-        row: row of the queen
-        col: column of the queen
-    Returns:
-        Boolean: True if the position is valid, False otherwise
-    """
-    # Check this row on left side
-    if 1 in board[row]:
-        return False
-
-    upper_diag = zip(range(row, -1, -1),
-                     range(col, -1, -1))
-    for i, j in upper_diag:
-        if board[i][j] == 1:
+def is_safe(board, row, col, N):
+    # Check if the current position is safe for the queen
+    # Check for queens in the same column
+    for i in range(row):
+        if board[i][col] == 'Q':
             return False
 
-    lower_diag = zip(range(row, len(board), 1),
-                     range(col, -1, -1))
-    for i, j in lower_diag:
-        if board[i][j] == 1:
+    # Check for queens in the upper left diagonal
+    i = row - 1
+    j = col - 1
+    while i >= 0 and j >= 0:
+        if board[i][j] == 'Q':
             return False
+        i -= 1
+        j -= 1
+
+    # Check for queens in the upper right diagonal
+    i = row - 1
+    j = col + 1
+    while i >= 0 and j < N:
+        if board[i][j] == 'Q':
+            return False
+        i -= 1
+        j += 1
 
     return True
 
+def solve_nqueens(N):
+    board = [['.' for _ in range(N)] for _ in range(N)]
+    solutions = []
+    solve_nqueens_helper(board, 0, N, solutions)
+    return solutions
 
-def nqueens_helper(board, col):
-    """
-    Helper function for nqueens
-    Args:
-        board: 2D array representing the board
-        col: column to start from
-    Returns:
-        Boolean: True if a solution is found, False otherwise
-    """
-    if col >= len(board):
-        print_board(board, len(board))
-    for i in range(len(board)):
-        if is_valid(board, i, col):
-            board[i][col] = 1
-            result = nqueens_helper(board, col + 1)
-            if result:
-                return True
-            board[i][col] = 0
-    return False
+def solve_nqueens_helper(board, row, N, solutions):
+    if row == N:
+        # Found a solution, add it to the list of solutions
+        solutions.append([''.join(row) for row in board])
+        return
 
+    for col in range(N):
+        if is_safe(board, row, col, N):
+            # Place a queen at the current position
+            board[row][col] = 'Q'
 
-def print_board(board, n):
-    """
-    Prints positions of the queens
-    Args:
-        board: 2D array representing the board
-        n: size of the board
-    Returns:
-        None
-    """
-    b = []
+            # Recursively solve for the next row
+            solve_nqueens_helper(board, row + 1, N, solutions)
 
-    for i in range(n):
-        for j in range(n):
-            if board[i][j] == 1:
-                b.append([i, j])
-    print(b)
+            # Backtrack and remove the queen from the current position
+            board[row][col] = '.'
 
-
-def nqueens(n):
-    """
-    Finds all possible solutions to the n-queens problem
-    Args:
-        n: size of the board
-    Returns:
-        None
-    """
-    board = []
-    for i in range(n):
-        row = [0] * n
-        board.append(row)
-    nqueens_helper(board, 0)
-
-
-if __name__ == "__main__":
+def main():
+    # Check the command line arguments
     if len(sys.argv) != 2:
         print("Usage: nqueens N")
-        exit(1)
-    queens = sys.argv[1]
-    if not queens.isnumeric():
+        sys.exit(1)
+
+    try:
+        N = int(sys.argv[1])
+    except ValueError:
         print("N must be a number")
-        exit(1)
-    elif int(queens) < 4:
+        sys.exit(1)
+
+    if N < 4:
         print("N must be at least 4")
-        exit(1)
-    nqueens(int(queens))
+        sys.exit(1)
+
+    solutions = solve_nqueens(N)
+
+    # Print the solutions
+    for solution in solutions:
+        print('\n'.join(solution))
+        print()
+
+if __name__ == '__main__':
+    main(
