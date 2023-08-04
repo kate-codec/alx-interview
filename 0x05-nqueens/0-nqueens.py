@@ -1,77 +1,50 @@
 import sys
 
-def is_safe(board, row, col, N):
-    # Check if the current position is safe for the queen
-    # Check for queens in the same column
-    for i in range(row):
-        if board[i][col] == 'Q':
-            return False
+def is_attacked(board, row, col):
+  for i in range(row):
+    if board[i][col] == 1:
+      return True
 
-    # Check for queens in the upper left diagonal
-    i = row - 1
-    j = col - 1
-    while i >= 0 and j >= 0:
-        if board[i][j] == 'Q':
-            return False
-        i -= 1
-        j -= 1
+  for i in range(row, n):
+    for j in range(col):
+      if board[i][j] == 1 and (i - row) == (j - col) or (i - row) == (col - j):
+        return True
 
-    # Check for queens in the upper right diagonal
-    i = row - 1
-    j = col + 1
-    while i >= 0 and j < N:
-        if board[i][j] == 'Q':
-            return False
-        i -= 1
-        j += 1
+  for i in range(row - 1, -1, -1):
+    for j in range(col - 1, -1, -1):
+      if board[i][j] == 1 and (row - i) == (col - j) or (row - i) == (j - col):
+        return True
 
-    return True
+  return False
 
-def solve_nqueens(N):
-    board = [['.' for _ in range(N)] for _ in range(N)]
-    solutions = []
-    solve_nqueens_helper(board, 0, N, solutions)
-    return solutions
+def nqueens(board, row):
+  if row == n:
+    print(board)
+    return
 
-def solve_nqueens_helper(board, row, N, solutions):
-    if row == N:
-        # Found a solution, add it to the list of solutions
-        solutions.append([''.join(row) for row in board])
-        return
-
-    for col in range(N):
-        if is_safe(board, row, col, N):
-            # Place a queen at the current position
-            board[row][col] = 'Q'
-
-            # Recursively solve for the next row
-            solve_nqueens_helper(board, row + 1, N, solutions)
-
-            # Backtrack and remove the queen from the current position
-            board[row][col] = '.'
+  for col in range(n):
+    if not is_attacked(board, row, col):
+      board[row][col] = 1
+      nqueens(board, row + 1)
+      board[row][col] = 0
 
 def main():
-    # Check the command line arguments
-    if len(sys.argv) != 2:
-        print("Usage: nqueens N")
-        sys.exit(1)
+  if len(sys.argv) != 2:
+    print("Usage: nqueens N")
+    exit(1)
 
-    try:
-        N = int(sys.argv[1])
-    except ValueError:
-        print("N must be a number")
-        sys.exit(1)
+  try:
+    n = int(sys.argv[1])
+  except ValueError:
+    print("N must be a number")
+    exit(1)
 
-    if N < 4:
-        print("N must be at least 4")
-        sys.exit(1)
+  if n < 4:
+    print("N must be at least 4")
+    exit(1)
 
-    solutions = solve_nqueens(N)
+  board = [[0 for i in range(n)] for j in range(n)]
+  nqueens(board, 0)
 
-    # Print the solutions
-    for solution in solutions:
-        print('\n'.join(solution))
-        print()
-
-if __name__ == '__main__':
-    main(
+if __name__ == "__main__":
+  main()
