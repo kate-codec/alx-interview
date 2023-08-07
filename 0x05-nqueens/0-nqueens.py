@@ -1,50 +1,98 @@
+#!/usr/bin/python3
+"""0-nqueens module that solves the N queens problem
+"""
 import sys
 
-def is_attacked(board, row, col):
-  for i in range(row):
-    if board[i][col] == 1:
-      return True
 
-  for i in range(row, n):
-    for j in range(col):
-      if board[i][j] == 1 and (i - row) == (j - col) or (i - row) == (col - j):
+def nqueens(num):
+    """nqueens function that solves the N queens problem
+
+    Args:
+        num (int): number of queens
+    """
+    board = [[0 for x in range(num)] for y in range(num)]
+    solve_nqueens(board, 0, num)
+
+
+def solve_nqueens(board, col, num):
+    """solve_nqueens function that solves the N queens problem
+
+    Args:
+        board (list): board list
+        col (int): column number
+        num (int): number of queens in board
+
+    Returns:
+        bool: True if safe, False otherwise
+    """
+    if col == num:
+        print_board(board)
         return True
 
-  for i in range(row - 1, -1, -1):
-    for j in range(col - 1, -1, -1):
-      if board[i][j] == 1 and (row - i) == (col - j) or (row - i) == (j - col):
-        return True
+    res = False
+    for i in range(num):
+        if is_safe(board, i, col, num):
+            board[i][col] = 1
+            res = solve_nqueens(board, col + 1, num) or res
+            board[i][col] = 0
+    return res
 
-  return False
 
-def nqueens(board, row):
-  if row == n:
-    print(board)
-    return
+def is_safe(board, row, col, num):
+    """is_safe function that checks if a queen can be placed on board
 
-  for col in range(n):
-    if not is_attacked(board, row, col):
-      board[row][col] = 1
-      nqueens(board, row + 1)
-      board[row][col] = 0
+    Args:
+        board (list): board list
+        row (int): row number
+        col (int): column number
+        num (int): number of queens in board
 
-def main():
-  if len(sys.argv) != 2:
-    print("Usage: nqueens N")
-    exit(1)
+    Returns:
+        bool: True if safe, False otherwise
+    """
+    safe_row = row
+    safe_col = col
+    while safe_col >= 0 and safe_row < num:
+        if board[safe_row][safe_col] == 1:
+            return False
+        safe_row += 1
+        safe_col -= 1
 
-  try:
-    n = int(sys.argv[1])
-  except ValueError:
-    print("N must be a number")
-    exit(1)
+    safe_row = row
+    safe_col = col
+    while safe_row >= 0 and safe_col >= 0:
+        if board[safe_row][safe_col] == 1:
+            return False
+        safe_row -= 1
+        safe_col -= 1
 
-  if n < 4:
-    print("N must be at least 4")
-    exit(1)
+    for i in range(col):
+        if board[row][i] == 1:
+            return False
+    return True
 
-  board = [[0 for i in range(n)] for j in range(n)]
-  nqueens(board, 0)
+
+def print_board(board):
+    """print_board function that prints the board
+
+    Args:
+        board (list): board list
+    """
+    print([[i, j] for i in range(
+        len(board)) for j in range(len(board)) if board[i][j] == 1])
+
 
 if __name__ == "__main__":
-  main()
+    if len(sys.argv) != 2:
+        print("Usage: nqueens N")
+        sys.exit(1)
+    try:
+        NUM = int(sys.argv[1])
+        if NUM < 4:
+            print("N must be at least 4")
+            sys.exit(1)
+        nqueens(NUM)
+    except ValueError:
+        print("N must be a number")
+        sys.exit(1)
+
